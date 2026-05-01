@@ -1,0 +1,219 @@
+---
+title: "Mapa Perú"
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+```{r}
+install.packages(c("sf", "ggplot2", "viridis", "dplyr", "scales","ggrepel"),
+                 repos = "https://cran.r-project.org")
+library(ggplot2)
+library(sf)
+library(scales)
+library(dplyr)
+
+peru_dep <- st_read("C:/Users/Renato/MAPA/INEI_LIMITE_DEPARTAMENTAL_GEOGPSPERU_JUANSUYO_931381206.shp")
+```
+
+```{r}
+names(peru_dep)
+```
+
+```{r}
+
+ggplot(peru_dep) +
+  geom_sf(fill = "#E5E7EB", color = "white", size = 0.3) +
+  ggtitle("Mapa del Perú por Departamentos") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+```
+
+```{r}
+datos <- read.csv("C:/Users/Renato/MAPA/SINADEF_DATOS_ABIERTOS.csv")
+
+names(datos)
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+
+
+datos <- datos %>%
+  mutate(across(starts_with("CAUSA_"), ~ str_trim(.)),
+         MUERTE_VIOLENTA = str_trim(MUERTE_VIOLENTA))
+
+
+suicidios <- datos %>%
+  filter(
+    
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_A_CIEX) |
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_B_CIEX) |
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_C_CIEX) |
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_D_CIEX) |
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_E_CIEX) |
+    grepl("^X6|^X7|^X8[0-4]", CAUSA_F_CIEX) |
+   
+    MUERTE_VIOLENTA == "SUICIDIO"
+  )
+
+
+table(suicidios$ANIO)
+
+```
+
+```{r}
+DF <- suicidios %>%
+  group_by(DEPARTAMENTO_FALLECIMIENTO) %>%
+  summarise(total = n(), .groups = "drop")
+```
+
+```{r}
+
+DF <- suicidios %>%
+  group_by(DEPARTAMENTO_FALLECIMIENTO) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(DEPARTAMENTO_FALLECIMIENTO = toupper(trimws(DEPARTAMENTO_FALLECIMIENTO)))
+
+
+DF$DEPARTAMENTO_FALLECIMIENTO[DF$DEPARTAMENTO_FALLECIMIENTO == "LIMA METROPOLITANA"] <- "LIMA"
+
+
+DF <- merge(
+  data.frame(NOMBDEP = toupper(trimws(peru_dep$NOMBDEP))), 
+  DF, 
+  by.x = "NOMBDEP", 
+  by.y = "DEPARTAMENTO_FALLECIMIENTO", 
+  all.x = TRUE
+)
+
+
+DF$total[is.na(DF$total)] <- 0
+
+mapa_final <- merge(peru_dep, DF, by = "NOMBDEP", all.x = TRUE)
+
+mapa_final$total[is.na(mapa_final$total)] <- 0
+```
+
+```{r}
+write.csv(DF,
+          "C:/Users/Renato/MAPA/suicidios_por_departamento.csv",
+          row.names = FALSE)
+```
+
+```{r}
+DF <- suicidios %>%
+  group_by(DEPARTAMENTO_FALLECIMIENTO) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(
+    DEPARTAMENTO_FALLECIMIENTO = toupper(trimws(DEPARTAMENTO_FALLECIMIENTO)),
+    DEPARTAMENTO_FALLECIMIENTO = ifelse(
+      DEPARTAMENTO_FALLECIMIENTO == "LIMA METROPOLITANA", "LIMA", DEPARTAMENTO_FALLECIMIENTO
+    )
+  )
+
+DF <- merge(
+  data.frame(DEPARTAMENTO_FALLECIMIENTO = toupper(trimws(peru_dep$NOMBDEP))),
+  DF, by = "DEPARTAMENTO_FALLECIMIENTO", all.x = TRUE
+)
+DF$total[is.na(DF$total)] <- 0
+
+mapa_raw <- merge(
+  peru_dep, DF,
+  by.x  = "NOMBDEP",
+  by.y  = "DEPARTAMENTO_FALLECIMIENTO",
+  all.x = TRUE
+)
+mapa_raw$total[is.na(mapa_raw$total)] <- 0
+
+mapa_proj <- st_transform(mapa_raw, crs = 32718)
+
+bb   <- st_bbox(mapa_proj)
+padx <- (bb["xmax"] - bb["xmin"]) * 0.03
+pady <- (bb["ymax"] - bb["ymin"]) * 0.03
+
+mx <- max(mapa_proj$total, na.rm = TRUE)
+
+breaks_v <- c(0, 
+              round(mx * 0.10), 
+              round(mx * 0.30), 
+              round(mx * 0.60), 
+              mx)
+
+p <- ggplot(mapa_proj) +
+  geom_sf(
+    aes(fill = total),
+    color     = "white",
+    linewidth = 0.3
+  ) +
+  scale_fill_gradientn(
+    colours = c("#FFF7EC", "#FEE8C8", "#FDD49E", 
+                "#FC8D59", "#E34A33", "#B30000"),
+    trans   = "sqrt", 
+    name    = "Casos\nregistrados",
+    limits  = c(0, mx),
+    breaks  = breaks_v,
+    labels  = comma,
+    guide   = guide_colorbar(
+      barwidth        = 0.8,
+      barheight       = 8,
+      title.position  = "top",
+      title.hjust      = 0.5,
+      ticks.colour    = "#666666",
+      ticks.linewidth = 0.4,
+      frame.colour    = "#DDDDDD",
+      frame.linewidth = 0.4
+    )
+  ) +
+  coord_sf(
+    xlim   = c(bb["xmin"] - padx, bb["xmax"] + padx),
+    ylim   = c(bb["ymin"] - pady, bb["ymax"] + pady),
+    expand = FALSE
+  ) +
+  labs(
+    title    = "Mortalidad por suicidio en el Perú",
+    subtitle = paste0("Casos acumulados por departamento (2017 - 2026)\n", 
+                      "Filtro: Códigos CIE-10 y Variable 'Muerte Violenta'"),
+    caption  = "Fuente: SINADEF – MINSA | Elaboración propia"
+  ) +
+  theme_void(base_family = "sans") +
+  theme(
+    plot.background  = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(
+      size   = 16, face = "bold", hjust = 0.5, 
+      color  = "#111111", margin = margin(t = 14, b = 3)
+    ),
+    plot.subtitle = element_text(
+      size   = 9, hjust = 0.5, 
+      color  = "#555555", margin = margin(b = 8)
+    ),
+    plot.caption = element_text(
+      size   = 7, hjust = 0.5, 
+      color  = "#999999", margin = margin(t = 8, b = 10)
+    ),
+    legend.position      = "right",
+    legend.justification = "center",
+    legend.title  = element_text(color = "#222222", size = 8, 
+                                 face = "bold", lineheight = 1.4),
+    legend.text   = element_text(color = "#444444", size = 7.5),
+    plot.margin = margin(10, 8, 8, 8)
+  )
+
+ggsave(
+  "mapa_suicidios_peru_final.png",
+  plot   = p,
+  width  = 6,
+  height = 9,
+  dpi    = 300,
+  bg     = "white"
+)
+print(p)
+```
