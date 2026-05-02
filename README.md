@@ -102,7 +102,7 @@ ggplot(mapa) +
     name = "Casos"
   ) +
   labs(
-    title = "Mortalidad por suicidio en el Perú",
+    title = "Distribución de casos de suicidio en el Perú",
     subtitle = "Distribución por departamento",
     caption = "Fuente: SINADEF - MINSA"
   ) +
