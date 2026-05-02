@@ -23,3 +23,17 @@ library(dplyr)
 
 peru_dep <- st_read("C:/Users/Renato/MAPA/INEI_LIMITE_DEPARTAMENTAL_GEOGPSPERU_JUANSUYO_931381206.shp")
 ```
+Impotante: En caso de no contar con las librerías instaladas, quitar el símbolo de comentario(#) al momento de ejecutar el código en R, por el contrario mantenerlo.
+
+### Carga del shapefile
+Una vez descargado el shapefile, se procede a cargarlo en R utilizando la librería sf.
+```r
+peru_dep <- st_read("ruta/del/shapefile.shp")
+```
+
+### Carga de la base de datos
+A continuación, se importa la base de datos descargada desde el portal del Ministerio de Salud.
+```r
+datos <- read.csv("ruta/datos.csv")
+```
+Este conjunto de datos será la base para el análisis que se representará en el mapa.
