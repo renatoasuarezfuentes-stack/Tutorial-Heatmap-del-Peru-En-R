@@ -110,9 +110,9 @@ ggplot(mapa) +
 ```
 El resultado es un mapa de calor donde la intensidad del color representa la cantidad de casos en cada departamento.
 
-### Interpretación del mapa y Cierre
+### Interpretación del mapa y cierre
 
-El mapa permite identificar patrones espaciales en la distribución de los casos.mLas zonas con colores más intensos indican una mayor concentración, mientras que los tonos más claros representan menor cantidad de registros.
+El mapa permite identificar patrones espaciales en la distribución de los casos. Las zonas con colores más intensos indican una mayor concentración, mientras que los tonos más claros representan una menor cantidad de registros.
 
 Este procedimiento muestra cómo integrar datos geográficos y estadísticos en R para generar visualizaciones claras y útiles. Además, esta misma metodología puede aplicarse a otros temas, como resultados electorales u otros indicadores sociales.
 
