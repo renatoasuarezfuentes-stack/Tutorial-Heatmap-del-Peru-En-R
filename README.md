@@ -25,7 +25,7 @@ library(dplyr)
 
 peru_dep <- st_read("C:/Users/Renato/MAPA/INEI_LIMITE_DEPARTAMENTAL_GEOGPSPERU_JUANSUYO_931381206.shp")
 ```
-Impotante: En caso de no contar con las librerías instaladas, quitar el símbolo de comentario(#) al momento de ejecutar el código en R, por el contrario mantenerlo.
+Importante: En caso de no contar con las librerías instaladas, quitar el símbolo de comentario(#) al momento de ejecutar el código en R, por el contrario mantenerlo.
 
 ### Carga del shapefile
 Una vez descargado el shapefile, se procede a cargarlo en R utilizando la librería sf.
