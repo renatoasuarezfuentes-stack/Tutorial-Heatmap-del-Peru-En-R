@@ -11,6 +11,8 @@ Para poder construir el mapa del Perú, es necesario contar con un archivo que c
 Para complementar el mapa, se utilizaron datos abiertos del Ministerio de Salud del Perú, específicamente del sistema SINADEF: https://www.minsa.gob.pe/reunis/?op=1&niv=1&tbl=1
 Este portal proporciona información detallada sobre defunciones registradas en el país, incluyendo variables como la causa de muerte, ubicación geográfica y características demográficas. Para este tutorial, se trabajó con los registros asociados a suicidios, lo que permite analizar su distribución a nivel departamental.
 
+Para fines prácticos dentro de los archivos de repositorio se encuentra el dataset limpio y filtrado.
+
 ### Preparación del entorno de trabajo
 Antes de comenzar con el procesamiento de los datos, es necesario instalar y cargar las librerías que permitirán trabajar con información geográfica y generar visualizaciones.
 ```r
