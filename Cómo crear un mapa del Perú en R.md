@@ -1,5 +1,3 @@
-# STATS
-
 # Como Hacer un Mapa Coroplético
 
 ## Introducción
