@@ -114,4 +114,14 @@ El mapa permite identificar patrones espaciales en la distribución de los casos
 
 Este procedimiento muestra cómo integrar datos geográficos y estadísticos en R para generar visualizaciones claras y útiles. Además, esta misma metodología puede aplicarse a otros temas, como resultados electorales u otros indicadores sociales.
 
+Además, como parte del desarrollo del trabajo, se ha elaborado un documento en formato Quarto (.qmd), en el cual se incluye todo el proceso completo: carga de datos, limpieza, análisis y visualización.
+
+Este archivo se encuentra dentro del repositorio y permite:
+
+- Ejecutar nuevamente todo el análisis
+- Ver el código junto con sus resultados
+- Generar un reporte en formato HTML o PDF
+
+Asegurando así la reproducibilidad del trabajo y facilita su revisión.
+
 
