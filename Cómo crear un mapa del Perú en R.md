@@ -37,3 +37,81 @@ A continuación, se importa la base de datos descargada desde el portal del Mini
 datos <- read.csv("ruta/datos.csv")
 ```
 Este conjunto de datos será la base para el análisis que se representará en el mapa.
+
+### Preparación y limpieza de los datos
+Antes de trabajar con la información, es importante estandarizar los textos para evitar errores al momento de agrupar o unir datos, pero todo este preoceso depende de tu dataset y lo que busques representar con tu mapa de calor.
+```r
+datos <- datos %>%
+  mutate(
+    across(starts_with("CAUSA_"), ~ toupper(trimws(.))),
+    MUERTE_VIOLENTA = toupper(trimws(MUERTE_VIOLENTA)),
+    DEPARTAMENTO_FALLECIMIENTO = toupper(trimws(DEPARTAMENTO_FALLECIMIENTO))
+  )
+```
+Este paso permite que todos los valores tengan el mismo formato, evitando problemas como diferencias entre mayúsculas, minúsculas o espacios adicionales.
+
+### Identificación de los casos de suicidio 
+Para identificar correctamente los casos de suicidio, se utilizaron los códigos CIE-10 (X60–X84), los cuales corresponden a lesiones autoinfligidas intencionalmente. En lugar de depender únicamente de una variable, se revisan todas las posibles causas registradas en la base de datos.
+```r
+suicidios <- datos %>%
+  mutate(
+    suicidio = grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_A_CIEX) |
+               grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_B_CIEX) |
+               grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_C_CIEX) |
+               grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_D_CIEX) |
+               grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_E_CIEX) |
+               grepl("^X6[0-9]|^X7[0-9]|^X8[0-4]", CAUSA_F_CIEX) |
+               MUERTE_VIOLENTA == "SUICIDIO"
+  ) %>%
+  filter(suicidio)
+```
+Este enfoque permite capturar una mayor cantidad de registros y evita perder casos relevantes.
+
+### Agrupación de la información
+Una vez filtrados los datos, se agrupan por departamento para obtener el total de casos.
+```r
+DF <- suicidios %>%
+  group_by(DEPARTAMENTO_FALLECIMIENTO) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(
+    DEPARTAMENTO_FALLECIMIENTO = ifelse(
+      DEPARTAMENTO_FALLECIMIENTO == "LIMA METROPOLITANA",
+      "LIMA",
+      DEPARTAMENTO_FALLECIMIENTO
+    )
+  )
+```
+### Integración de datos con el mapa
+Ahora se procede a unir los datos estadísticos con el shapefile, utilizando el nombre del departamento como clave.
+```r
+mapa <- peru_dep %>%
+  mutate(NOMBDEP = toupper(trimws(NOMBDEP))) %>%
+  left_join(DF, by = c("NOMBDEP" = "DEPARTAMENTO_FALLECIMIENTO"))
+
+mapa$total[is.na(mapa$total)] <- 0
+```
+### Construcción del mapa de calor
+Finalmente, se genera la visualización utilizando ggplot2.
+```r
+ggplot(mapa) +
+  geom_sf(aes(fill = total), color = "white", linewidth = 0.3) +
+  scale_fill_gradientn(
+    colours = c("#FFF7EC", "#FDD49E", "#FC8D59", "#B30000"),
+    name = "Casos"
+  ) +
+  labs(
+    title = "Mortalidad por suicidio en el Perú",
+    subtitle = "Distribución por departamento",
+    caption = "Fuente: SINADEF - MINSA"
+  ) +
+  theme_void()
+```
+El resultado es un mapa de calor donde la intensidad del color representa la cantidad de casos en cada departamento.
+
+### Interpretación del mapa y Cierre
+
+El mapa permite identificar patrones espaciales en la distribución de los casos.mLas zonas con colores más intensos indican una mayor concentración, mientras que los tonos más claros representan menor cantidad de registros.
+
+Este procedimiento muestra cómo integrar datos geográficos y estadísticos en R para generar visualizaciones claras y útiles. Además, esta misma metodología puede aplicarse a otros temas, como resultados electorales u otros indicadores sociales.
+
+
