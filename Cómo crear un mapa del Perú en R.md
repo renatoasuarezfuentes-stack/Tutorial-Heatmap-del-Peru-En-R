@@ -1,6 +1,8 @@
 # STATS
 
-Introducción
+Como Hacer un Mapa Coroplético
+
+##Introducción
 
 En este tutorial se explica cómo crear un mapa del Perú en R utilizando la técnica de mapa de calor (o mapa coroplético), la cual permite representar visualmente la intensidad de una variable en distintas regiones del país mediante colores.
 
