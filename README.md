@@ -125,3 +125,9 @@ Este archivo se encuentra dentro del repositorio y permite:
 - Generar un reporte en formato HTML o PDF
 
 Asegurando así la reproducibilidad del trabajo y facilita su revisión.
+
+## Visualización final
+
+A continuación, se presenta el mapa de calor obtenido:
+
+![Mapa de suicidios en el Perú](mapa_suicidios_peru_final.png)
