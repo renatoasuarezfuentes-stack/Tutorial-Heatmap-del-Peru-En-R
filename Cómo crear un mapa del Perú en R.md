@@ -14,5 +14,4 @@ Este portal proporciona información detallada sobre defunciones registradas en 
 ### Preparación del entorno de trabajo
 Antes de comenzar con el procesamiento de los datos, es necesario instalar y cargar las librerías que permitirán trabajar con información geográfica y generar visualizaciones.
 ```r
-aaa
-```r   
+aaa 
