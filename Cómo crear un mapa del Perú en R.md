@@ -14,4 +14,12 @@ Este portal proporciona información detallada sobre defunciones registradas en 
 ### Preparación del entorno de trabajo
 Antes de comenzar con el procesamiento de los datos, es necesario instalar y cargar las librerías que permitirán trabajar con información geográfica y generar visualizaciones.
 ```r
-aaa 
+#install.packages(c("sf", "ggplot2", "viridis", "dplyr", "scales","ggrepel"),
+                 #repos = "https://cran.r-project.org")
+library(ggplot2)
+library(sf)
+library(scales)
+library(dplyr)
+
+peru_dep <- st_read("C:/Users/Renato/MAPA/INEI_LIMITE_DEPARTAMENTAL_GEOGPSPERU_JUANSUYO_931381206.shp")
+```
